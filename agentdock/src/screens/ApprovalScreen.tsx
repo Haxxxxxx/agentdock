@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,59 +16,9 @@ import * as firebaseService from '../services/firebase';
 import ApprovalCard from '../components/ApprovalCard';
 import type { ApprovalRequest } from '../types';
 
-const DEMO_APPROVALS: ApprovalRequest[] = [
-  {
-    id: 'demo_approval_1',
-    agentId: 'demo_agent_1',
-    agentName: 'Trading Bot Alpha',
-    description: 'Swap 5 SOL for USDC on Jupiter — arbitrage opportunity detected (0.8% spread)',
-    status: 'pending',
-    createdAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-    expiresAt: new Date(Date.now() + 1000 * 60 * 13).toISOString(),
-    txType: 'swap',
-    estimatedSolCost: 5.0,
-    targetProgram: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
-    amount: 5.0,
-    tokenSymbol: 'SOL',
-  },
-  {
-    id: 'demo_approval_2',
-    agentId: 'demo_agent_3',
-    agentName: 'Yield Farmer',
-    description: 'Deposit 2000 USDC into Kamino vault — projected 12.4% APY',
-    status: 'pending',
-    createdAt: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
-    expiresAt: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
-    txType: 'program_interaction',
-    estimatedSolCost: 0.005,
-    targetProgram: 'KAMiNo5aPe7R4wQPCGaKKhLpMibYMeZ3GhH48fCFgQH',
-    amount: 2000,
-    tokenSymbol: 'USDC',
-  },
-  {
-    id: 'demo_approval_3',
-    agentId: 'demo_agent_2',
-    agentName: 'Security Monitor',
-    description: 'Emergency: Revoke token approval for suspicious program detected on your wallet',
-    status: 'pending',
-    createdAt: new Date(Date.now() - 1000 * 60 * 1).toISOString(),
-    expiresAt: new Date(Date.now() + 1000 * 60 * 4).toISOString(),
-    txType: 'program_interaction',
-    estimatedSolCost: 0.00001,
-    targetProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-  },
-];
-
 export default function ApprovalScreen() {
   const pendingApprovals = usePendingApprovals();
-  const { setPendingApprovals, updateApproval } = useAgentStore();
-
-  // Load demo approvals if none exist
-  useEffect(() => {
-    if (pendingApprovals.length === 0) {
-      setPendingApprovals(DEMO_APPROVALS);
-    }
-  }, []);
+  const { updateApproval } = useAgentStore();
 
   const displayApprovals = pendingApprovals.filter(
     (a) => a.status === 'pending'

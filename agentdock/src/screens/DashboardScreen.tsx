@@ -99,7 +99,10 @@ export default function DashboardScreen() {
 
       {/* Pending approvals banner */}
       {pendingCount > 0 && (
-        <TouchableOpacity style={styles.approvalBanner}>
+        <TouchableOpacity
+          style={styles.approvalBanner}
+          onPress={() => (navigation as any).navigate('Approvals')}
+        >
           <Text style={styles.approvalBannerText}>
             {pendingCount} pending approval{pendingCount !== 1 ? 's' : ''} — tap to review
           </Text>

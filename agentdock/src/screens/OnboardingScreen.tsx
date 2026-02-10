@@ -111,7 +111,7 @@ export default function OnboardingScreen() {
         id: 'demo_agent_1',
         name: 'Trading Bot Alpha',
         walletAddress: 'DemoWa11etAddr3ss1111111111111111111111111111',
-        description: 'DeFi trading agent',
+        description: 'DeFi trading agent — executes arbitrage and limit orders across Jupiter and Raydium',
         status: 'active' as const,
         apiKeyHash: '',
         createdAt: '2026-02-08T10:00:00Z',
@@ -124,7 +124,7 @@ export default function OnboardingScreen() {
         id: 'demo_agent_2',
         name: 'Security Monitor',
         walletAddress: 'DemoWa11etAddr3ss2222222222222222222222222222',
-        description: 'Monitors for suspicious activity',
+        description: 'Monitors wallet activity and revokes suspicious token approvals',
         status: 'active' as const,
         apiKeyHash: '',
         createdAt: '2026-02-07T08:00:00Z',
@@ -137,7 +137,7 @@ export default function OnboardingScreen() {
         id: 'demo_agent_3',
         name: 'Yield Farmer',
         walletAddress: 'DemoWa11etAddr3ss3333333333333333333333333333',
-        description: 'Optimizes yield across protocols',
+        description: 'Optimizes yield across Kamino, Marinade, and Jito vaults',
         status: 'paused' as const,
         apiKeyHash: '',
         createdAt: '2026-02-09T14:00:00Z',
@@ -148,9 +148,227 @@ export default function OnboardingScreen() {
       },
     ];
 
+    const now = Date.now();
+    const store = useAgentStore.getState();
+
     setUser(demoUser);
     setAuthenticated(true);
-    useAgentStore.getState().setAgents(demoAgents);
+    store.setAgents(demoAgents);
+
+    // Demo transactions — realistic Solana DeFi activity
+    store.setTransactions('demo_agent_1', [
+      {
+        id: 'demo_tx_1a',
+        agentId: 'demo_agent_1',
+        signature: '5xYz...demo1a',
+        type: 'swap',
+        description: 'Swapped 2.5 SOL for 450 USDC on Jupiter',
+        timestamp: new Date(now - 1000 * 60 * 5).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss1111111111111111111111111111',
+        to: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
+        solAmount: 2.5,
+        tokenAmount: 450,
+        tokenSymbol: 'USDC',
+      },
+      {
+        id: 'demo_tx_1b',
+        agentId: 'demo_agent_1',
+        signature: '3dEf...demo1b',
+        type: 'swap',
+        description: 'Swapped 500 USDC for 2.78 SOL on Raydium',
+        timestamp: new Date(now - 1000 * 60 * 45).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss1111111111111111111111111111',
+        to: '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8',
+        solAmount: 2.78,
+        tokenAmount: 500,
+        tokenSymbol: 'USDC',
+      },
+      {
+        id: 'demo_tx_1c',
+        agentId: 'demo_agent_1',
+        signature: '8aBc...demo1c',
+        type: 'transfer',
+        description: 'Transferred 0.5 SOL to profit vault',
+        timestamp: new Date(now - 1000 * 60 * 120).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss1111111111111111111111111111',
+        to: 'VaultAddr3ss999999999999999999999999999999999',
+        solAmount: 0.5,
+      },
+      {
+        id: 'demo_tx_1d',
+        agentId: 'demo_agent_1',
+        signature: '2jKl...demo1d',
+        type: 'swap',
+        description: 'Swap failed — slippage exceeded on SOL/BONK',
+        timestamp: new Date(now - 1000 * 60 * 240).toISOString(),
+        status: 'failed',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss1111111111111111111111111111',
+        to: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
+        solAmount: 1.2,
+      },
+    ]);
+
+    store.setTransactions('demo_agent_2', [
+      {
+        id: 'demo_tx_2a',
+        agentId: 'demo_agent_2',
+        signature: '7gHi...demo2a',
+        type: 'program_interaction',
+        description: 'Revoked token approval for suspicious program',
+        timestamp: new Date(now - 1000 * 60 * 15).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss2222222222222222222222222222',
+        to: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+      },
+      {
+        id: 'demo_tx_2b',
+        agentId: 'demo_agent_2',
+        signature: '4mNp...demo2b',
+        type: 'transfer',
+        description: 'Moved 0.1 SOL to monitoring fee account',
+        timestamp: new Date(now - 1000 * 60 * 180).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss2222222222222222222222222222',
+        to: 'FeeAcct999999999999999999999999999999999999',
+        solAmount: 0.1,
+      },
+    ]);
+
+    store.setTransactions('demo_agent_3', [
+      {
+        id: 'demo_tx_3a',
+        agentId: 'demo_agent_3',
+        signature: '9qRs...demo3a',
+        type: 'stake',
+        description: 'Staked 10 SOL via Marinade Finance',
+        timestamp: new Date(now - 1000 * 60 * 60).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss3333333333333333333333333333',
+        to: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
+        solAmount: 10,
+      },
+      {
+        id: 'demo_tx_3b',
+        agentId: 'demo_agent_3',
+        signature: '6tUv...demo3b',
+        type: 'program_interaction',
+        description: 'Deposited 2000 USDC into Kamino vault',
+        timestamp: new Date(now - 1000 * 60 * 300).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss3333333333333333333333333333',
+        to: 'KAMiNo5aPe7R4wQPCGaKKhLpMibYMeZ3GhH48fCFgQH',
+        tokenAmount: 2000,
+        tokenSymbol: 'USDC',
+      },
+      {
+        id: 'demo_tx_3c',
+        agentId: 'demo_agent_3',
+        signature: '1wXy...demo3c',
+        type: 'program_interaction',
+        description: 'Claimed 3.2 JTO rewards from Jito vault',
+        timestamp: new Date(now - 1000 * 60 * 600).toISOString(),
+        status: 'success',
+        fee: 0.000005,
+        from: 'DemoWa11etAddr3ss3333333333333333333333333333',
+        to: 'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn',
+        tokenAmount: 3.2,
+        tokenSymbol: 'JTO',
+      },
+    ]);
+
+    // Demo spending policies — different profiles per agent
+    store.setPolicy('demo_agent_1', {
+      id: 'policy_demo_agent_1',
+      agentId: 'demo_agent_1',
+      dailyLimitSol: 10,
+      perTxLimitSol: 3,
+      allowlistedPrograms: [
+        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
+        '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8',
+      ],
+      requireApprovalAbove: 1,
+      isActive: true,
+      updatedAt: new Date().toISOString(),
+    });
+    store.setPolicy('demo_agent_2', {
+      id: 'policy_demo_agent_2',
+      agentId: 'demo_agent_2',
+      dailyLimitSol: 0.5,
+      perTxLimitSol: 0.1,
+      allowlistedPrograms: ['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'],
+      requireApprovalAbove: 0.05,
+      isActive: true,
+      updatedAt: new Date().toISOString(),
+    });
+    store.setPolicy('demo_agent_3', {
+      id: 'policy_demo_agent_3',
+      agentId: 'demo_agent_3',
+      dailyLimitSol: 50,
+      perTxLimitSol: 15,
+      allowlistedPrograms: [
+        'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
+        'KAMiNo5aPe7R4wQPCGaKKhLpMibYMeZ3GhH48fCFgQH',
+        'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn',
+      ],
+      requireApprovalAbove: 5,
+      isActive: true,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // Demo pending approvals — show immediately in badge + approval screen
+    store.setPendingApprovals([
+      {
+        id: 'demo_approval_1',
+        agentId: 'demo_agent_1',
+        agentName: 'Trading Bot Alpha',
+        description: 'Swap 5 SOL for USDC on Jupiter — arbitrage opportunity detected (0.8% spread)',
+        status: 'pending',
+        createdAt: new Date(now - 1000 * 60 * 2).toISOString(),
+        expiresAt: new Date(now + 1000 * 60 * 13).toISOString(),
+        txType: 'swap',
+        estimatedSolCost: 5.0,
+        targetProgram: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
+        amount: 5.0,
+        tokenSymbol: 'SOL',
+      },
+      {
+        id: 'demo_approval_2',
+        agentId: 'demo_agent_3',
+        agentName: 'Yield Farmer',
+        description: 'Deposit 2000 USDC into Kamino vault — projected 12.4% APY',
+        status: 'pending',
+        createdAt: new Date(now - 1000 * 60 * 8).toISOString(),
+        expiresAt: new Date(now + 1000 * 60 * 7).toISOString(),
+        txType: 'program_interaction',
+        estimatedSolCost: 0.005,
+        targetProgram: 'KAMiNo5aPe7R4wQPCGaKKhLpMibYMeZ3GhH48fCFgQH',
+        amount: 2000,
+        tokenSymbol: 'USDC',
+      },
+      {
+        id: 'demo_approval_3',
+        agentId: 'demo_agent_2',
+        agentName: 'Security Monitor',
+        description: 'Emergency: Revoke token approval for suspicious program detected on your wallet',
+        status: 'pending',
+        createdAt: new Date(now - 1000 * 60 * 1).toISOString(),
+        expiresAt: new Date(now + 1000 * 60 * 4).toISOString(),
+        txType: 'program_interaction',
+        estimatedSolCost: 0.00001,
+        targetProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+      },
+    ]);
   };
 
   if (mode === 'addAgent') {
