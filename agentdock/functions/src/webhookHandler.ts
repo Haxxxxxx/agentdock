@@ -73,7 +73,9 @@ function mapHeliusType(heliusType: string): TransactionType {
 
 // ─── Firestore Refs ─────────────────────────────────────────
 
-const db = admin.firestore();
+function getDb() {
+  return admin.firestore();
+}
 
 // ─── FCM Notification Helper ────────────────────────────────
 
@@ -83,7 +85,7 @@ async function sendPushToOwner(
   body: string,
   data?: Record<string, string>
 ): Promise<void> {
-  const userDoc = await db.collection("users").doc(ownerId).get();
+  const userDoc = await getDb().collection("users").doc(ownerId).get();
   if (!userDoc.exists) return;
 
   const user = userDoc.data();
@@ -104,7 +106,7 @@ async function sendPushToOwner(
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"
     ) {
-      await db.collection("users").doc(ownerId).update({ fcmToken: admin.firestore.FieldValue.delete() });
+      await getDb().collection("users").doc(ownerId).update({ fcmToken: admin.firestore.FieldValue.delete() });
     }
     functions.logger.error("FCM send failed", { ownerId, error: err });
   }
@@ -132,7 +134,7 @@ export const onHeliusWebhook = onRequest(
     const transactions: HeliusEnhancedTransaction[] = payload;
     functions.logger.info(`Received ${transactions.length} transactions from Helius`);
 
-    const batch = db.batch();
+    const batch = getDb().batch();
     const agentNotifications: Map<
       string,
       { agentName: string; ownerId: string; txCount: number }
@@ -179,7 +181,7 @@ export const onHeliusWebhook = onRequest(
         };
 
         // Match transaction to an agent by wallet address (from or to)
-        const agentSnap = await db
+        const agentSnap = await getDb()
           .collection("agents")
           .where("walletAddress", "in", [from, to])
           .limit(1)
@@ -213,7 +215,7 @@ export const onHeliusWebhook = onRequest(
         }
 
         // Store the transaction
-        const txRef = db.collection("transactions").doc();
+        const txRef = getDb().collection("transactions").doc();
         txDoc.id = txRef.id;
         batch.set(txRef, txDoc);
       } catch (err) {

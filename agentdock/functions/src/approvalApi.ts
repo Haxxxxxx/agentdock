@@ -27,7 +27,9 @@ interface ApprovalRequestBody {
 
 // ─── Firestore + Helpers ────────────────────────────────────
 
-const db = admin.firestore();
+function getDb() {
+  return admin.firestore();
+}
 
 function hashApiKey(key: string): string {
   return crypto.createHash("sha256").update(key).digest("hex");
@@ -45,7 +47,7 @@ async function sendPushToOwner(
   body: string,
   data?: Record<string, string>
 ): Promise<void> {
-  const userDoc = await db.collection("users").doc(ownerId).get();
+  const userDoc = await getDb().collection("users").doc(ownerId).get();
   if (!userDoc.exists) return;
 
   const user = userDoc.data();
@@ -65,7 +67,7 @@ async function sendPushToOwner(
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"
     ) {
-      await db.collection("users").doc(ownerId).update({
+      await getDb().collection("users").doc(ownerId).update({
         fcmToken: admin.firestore.FieldValue.delete(),
       });
     }
@@ -98,7 +100,7 @@ async function authenticateAgent(
 
   const keyHash = hashApiKey(apiKey);
 
-  const snap = await db
+  const snap = await getDb()
     .collection("agents")
     .where("apiKeyHash", "==", keyHash)
     .limit(1)
@@ -143,7 +145,7 @@ app.post("/api/agents/register", async (req, res) => {
     }
 
     // Verify owner exists
-    const ownerDoc = await db.collection("users").doc(body.ownerId).get();
+    const ownerDoc = await getDb().collection("users").doc(body.ownerId).get();
     if (!ownerDoc.exists) {
       res.status(404).json({ error: "Owner user not found" });
       return;
@@ -154,7 +156,7 @@ app.post("/api/agents/register", async (req, res) => {
     const apiKeyHash = hashApiKey(apiKey);
 
     const now = new Date().toISOString();
-    const agentRef = db.collection("agents").doc();
+    const agentRef = getDb().collection("agents").doc();
 
     const agentData = {
       id: agentRef.id,
@@ -169,7 +171,7 @@ app.post("/api/agents/register", async (req, res) => {
     };
 
     // Create agent + default policy + update owner's agentIds atomically
-    const policyRef = db.collection("policies").doc();
+    const policyRef = getDb().collection("policies").doc();
     const defaultPolicy = {
       id: policyRef.id,
       agentId: agentRef.id,
@@ -181,10 +183,10 @@ app.post("/api/agents/register", async (req, res) => {
       updatedAt: now,
     };
 
-    const batch = db.batch();
+    const batch = getDb().batch();
     batch.set(agentRef, agentData);
     batch.set(policyRef, defaultPolicy);
-    batch.update(db.collection("users").doc(body.ownerId), {
+    batch.update(getDb().collection("users").doc(body.ownerId), {
       agentIds: admin.firestore.FieldValue.arrayUnion(agentRef.id),
     });
     await batch.commit();
@@ -242,7 +244,7 @@ app.post(
       const expiresInMs = (body.expiresInMinutes ?? 15) * 60 * 1000;
       const expiresAt = new Date(now.getTime() + expiresInMs);
 
-      const approvalRef = db.collection("approvals").doc();
+      const approvalRef = getDb().collection("approvals").doc();
       const approvalData = {
         id: approvalRef.id,
         agentId: agent.id,
@@ -305,7 +307,7 @@ app.get(
       const approvalId = req.params.id;
       const agentId = res.locals.agentId as string;
 
-      const doc = await db.collection("approvals").doc(approvalId).get();
+      const doc = await getDb().collection("approvals").doc(approvalId).get();
       if (!doc.exists) {
         res.status(404).json({ error: "Approval request not found" });
         return;
@@ -361,7 +363,7 @@ app.get(
         return;
       }
 
-      const snap = await db
+      const snap = await getDb()
         .collection("policies")
         .where("agentId", "==", requestedAgentId)
         .where("isActive", "==", true)

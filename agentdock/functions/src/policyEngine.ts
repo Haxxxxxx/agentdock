@@ -20,14 +20,16 @@ interface PolicyEvaluation {
 
 // ─── Policy Engine ──────────────────────────────────────────
 
-const db = admin.firestore();
+function getDb() {
+  return admin.firestore();
+}
 
 /**
  * Load the spending policy for a given agent.
  * Returns null if no active policy exists.
  */
 async function loadPolicy(agentId: string): Promise<SpendingPolicy | null> {
-  const snap = await db
+  const snap = await getDb()
     .collection("policies")
     .where("agentId", "==", agentId)
     .where("isActive", "==", true)
@@ -50,7 +52,7 @@ async function getDailySpending(agentId: string): Promise<number> {
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
   );
 
-  const snap = await db
+  const snap = await getDb()
     .collection("transactions")
     .where("agentId", "==", agentId)
     .where("status", "==", "success")
